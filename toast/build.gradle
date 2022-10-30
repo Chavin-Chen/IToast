@@ -1,0 +1,86 @@
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+    id 'signing'
+}
+
+android {
+    compileSdk 32
+
+    defaultConfig {
+        minSdk 19
+        targetSdk 32
+
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+}
+
+
+publishing {
+    repositories {
+        maven {
+            url = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = project['ossrh.username']
+                password = project['ossrh.password']
+            }
+        }
+    }
+    publications {
+        release(MavenPublication) {
+            groupId = 'io.github.chavin-chen'
+            artifactId = 'util-toast'
+            version = '1.0.0'
+
+            artifact project.tasks.create('sourcesJar', Jar) {
+                archiveClassifier = 'sources'
+                from project.android.sourceSets.release.java.srcDirs
+                exclude "**/R.java", "**/BuildConfig.java"
+            }
+            afterEvaluate {
+                from components.release
+            }
+            pom {
+                name = 'IToast'
+                description = 'This is a compat library for android toast.'
+                url = 'https://github.com/Chavin-Chen/IToast'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        name = 'Chavin Chen'
+                        email = 'chavinchen@hotmail.com'
+                    }
+                }
+                scm {
+                    url = 'https://github.com/Chavin-Chen/IToast/tree/master'
+                    connection = 'scm:git:git://github.com/Chavin-Chen/IToast.git'
+                    developerConnection = 'scm:git:ssh://github.com:Chavin-Chen/IToast.git'
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications
+}
